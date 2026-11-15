@@ -1,0 +1,93 @@
+/* ════════════════════════════════════════════════════════════════
+   战舰（Battleships）—— 游戏专用皮肤
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  --bs-ship: #2f5568;
+  --bs-water: #dce8ee;
+  --bs-ink: #24231f;
+  --bs-board: #ece4d3;
+  --bs-board-line: #d4cbb9;
+}
+
+.board-svg .bs-board-bg {
+  fill: var(--bs-board);
+  stroke: var(--bs-board-line);
+  stroke-width: 1.5;
+}
+
+.board-svg .bs-cell {
+  stroke: rgba(36, 35, 31, 0.1);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.board-svg .bs-cell.empty {
+  fill: #fbf7ee;
+}
+
+.board-svg .bs-cell.water {
+  fill: var(--bs-water);
+}
+
+.board-svg .bs-cell.ship {
+  fill: var(--bs-ship);
+  stroke: rgba(0, 0, 0, 0.3);
+}
+
+.board-svg .bs-ship-dot {
+  fill: rgba(255, 253, 248, 0.5);
+  pointer-events: none;
+}
+
+.board-svg .bs-given-ring {
+  fill: none;
+  stroke: rgba(31, 111, 92, 0.55);
+  stroke-width: 1.8;
+  pointer-events: none;
+}
+
+.board-svg .bs-sum {
+  fill: var(--bs-ink);
+  font-family: var(--mono);
+  font-weight: 700;
+  text-anchor: end;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.board-svg .bs-sum.col {
+  text-anchor: middle;
+}
+
+.board-svg .bs-sum.issue {
+  fill: var(--error);
+}
+
+.board-svg .bs-fleet {
+  fill: rgba(36, 35, 31, 0.7);
+  font-family: var(--mono);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.board-svg .bs-error {
+  fill: rgba(194, 59, 46, 0.12);
+  stroke: var(--error);
+  stroke-width: 2.2;
+  pointer-events: none;
+}
+
+.board-svg .cell-hit {
+  pointer-events: all;
+}
+
+.board-svg .cell-hit:hover {
+  fill: rgba(31, 111, 92, 0.16);
+}
+
+.custom-cell.v-ship {
+  background: var(--bs-ship);
+  border-color: var(--bs-ship);
+  color: #fffdf8;
+}
