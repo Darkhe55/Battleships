@@ -79,7 +79,68 @@ npm run dev       # 开发服务
 npm start         # 开发服务 + 自动打开浏览器
 npm run build     # tsc --noEmit + vite build
 npm run gen       # 重新生成题库
+npm run import-image -- 题图.png   # 从题面图片自动导入题库
 npm run check     # 审计题库
 npm run verify    # 参考解、逻辑回放与交互验证
 npm run audit     # 逐题审计逻辑解题
 ```
+
+## 图片导入
+
+`npm run import-image -- <图片路径>` 可以全自动识别整张战舰题图：棋盘网格、粗线分块、
+给定舰格/给定水格、盘外行/列数字、右侧舰队图例，并生成项目现有 `RawPuzzle` 格式
+（`board = 预填|舰队|行和|列和`）。
+
+```bash
+# 只识别与预览（不写入、不求解）
+npm run import-image -- 题图.png --dry
+
+# 识别 + 预览，并检查题面能否被游戏解码（默认预览模式，不写入）
+npm run import-image -- 题图.png
+
+# 识别并追加到题库（写入 src/game/imported-puzzles.ts，npm run gen 不会覆盖）
+npm run import-image -- 题图.png --name "月度舰队" --append
+
+# 识别 + 用项目求解器校验唯一解；30×30 大题通常会超时，只警告不阻止
+npm run import-image -- 题图.png --append --verify
+
+# 额外让项目求解器尝试求一组参考解写入 solution（超时只警告）
+npm run import-image -- 题图.png --append --verify --solve --solve-nodes 2000000
+```
+
+| 参数 | 说明 |
+|------|------|
+| `--size N` / `--width W --height H` | 覆盖棋盘尺寸（默认由网格线自动识别） |
+| `--rows "a,b,…"` / `--cols "a,b,…"` | 数字 OCR 不确定时手动覆盖行/列和 |
+| `--fleet "9,8,8,…"` | 手动指定舰队（每个元素一艘船的长度），覆盖图例识别结果 |
+| `--givens "…"` | 手动覆盖给定格（长 `W×H`，字符 `0/.`=空、`1/S/#`=舰格、`2/W/~`=水格） |
+| `--map 修正.json` | 用 JSON 批量修正：`{"givens": "…", "rows": […], "cols": […], "fleet": […], "solution": "…"}` |
+| `--solution "…"` | 手动提供参考解（长 `W×H`，`1`=舰格、`2`=水格；会用项目规则校验） |
+| `--name 名称` / `--id ID` / `--series 分组` | 题库里的名字 / id / 分组；同 id 重复导入会替换旧条目 |
+| `--append` | 写入 `src/game/imported-puzzles.ts` |
+| `--verify` | 唯一解检查（`--max-nodes` 可调搜索上限，超时只警告） |
+| `--solve` | 尝试用项目求解器求一组参考解（`--solve-nodes` 可调上限，超时只警告） |
+| `--dry` | 只识别、不求解、不写入 |
+| `--dump` | 打印逐行给定格，便于整理 `--map` 修正文件 |
+| `--debug` | 打印图例/网格等中间识别数据 |
+
+识别原理：
+
+1. Playwright + Edge 把图片画进 canvas 逐像素取色；
+2. 用「最长连续深色笔画」找横竖网格线，由首尾线中心等分得到 `nCols×nRows` 格子，
+   明显更粗的内部线只作为「粗线分块」装饰报告，不参与规则；
+3. 每格取中心区域：深色占比高 → 给定舰格，浅蓝占比高 → 给定水格，否则为空；
+4. 盘外数字用多字体模板匹配 OCR（行数字右对齐、列数字下沿对齐，自动排除行号/列标）；
+5. 右侧舰队图例：实心方块=舰长、空心框=该长度的条数，还原 `fleet`；
+6. 生成题面后用项目 `decodeBoard` 回读校验，并检查行列和合计 = 舰队总格数、
+   给定格不与规则矛盾，再按需 `--verify`/`--solve`/`--append`。
+
+限制：
+
+- 数字 OCR 依赖清晰的黑体数字与足够留白；若行列和合计对不上，预览会报错并提示用
+  `--rows/--cols` 或 `--map` 修正。
+- 舰队图例按「分段方块（每格一个方块）」样式识别；整条实心的图例条可能把舰长多算 1。
+- 30×30、165 格舰船的大题超出项目回溯求解器的能力范围，`--verify` 会超时并只警告，
+  唯一性可能无法自动确认；此时游戏里也能正常加载与游玩，但「显示解/提示」需要自己先解出或提供 `--solution`。
+- 粗线分块在本规则里没有语义，仅用于提示识别结果。
+

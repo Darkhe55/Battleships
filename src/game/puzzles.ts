@@ -3,6 +3,7 @@
  */
 
 import { RAW_PUZZLES } from './puzzles-data'
+import { IMPORTED_PUZZLES } from './imported-puzzles'
 import {
   asShipPuzzle,
   decodeBoard,
@@ -14,7 +15,7 @@ import {
 export const builtinPuzzles: BattleshipPuzzle[] = []
 const solutions = new Map<string, number[]>()
 
-for (const raw of RAW_PUZZLES) {
+for (const raw of [...RAW_PUZZLES, ...IMPORTED_PUZZLES]) {
   const size = raw.width * raw.height
   const decoded = decodeBoard(raw.board, size, raw.width, raw.height)
   if (!decoded) {
