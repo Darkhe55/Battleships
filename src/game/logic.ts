@@ -14,11 +14,14 @@ import {
 } from './types'
 
 const RULE_INFO: Record<RuleKind | 'probe' | 'search', { rule: number; label: string }> = {
-  adj: { rule: 1, label: '战舰之间不能相邻' },
-  sum: { rule: 2, label: '行列舰格数限制' },
-  fleet: { rule: 3, label: '舰队总格数限制' },
-  probe: { rule: 4, label: '反证：另一种状态会立刻矛盾' },
-  search: { rule: 5, label: '回溯试探：该格最终是这一状态' },
+  adj: { rule: 1, label: '战舰互不接触：斜向/侧向邻格必须是水' },
+  sum: { rule: 2, label: '行列舰格数上下界' },
+  fleet: { rule: 3, label: '舰队总格数守恒' },
+  seg: { rule: 4, label: '舰段端点定式：强制延伸 / 封水' },
+  comp: { rule: 5, label: '舰段长度与舰队库存匹配' },
+  place: { rule: 6, label: '最长舰唯一位置：所有可能位置共有的舰格' },
+  probe: { rule: 7, label: '反证：另一种状态会立刻矛盾' },
+  search: { rule: 8, label: '回溯试探：该格最终是这一状态' },
 }
 
 function fallbackSolve(
